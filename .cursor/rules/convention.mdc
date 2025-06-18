@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Nest js 개발규칙
+
+## 설정파일 사용 
+
+- ConfigService 를 사용할 땐, .env 파일을 참조 한다.
