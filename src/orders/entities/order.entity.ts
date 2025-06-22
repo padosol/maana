@@ -18,7 +18,7 @@ export class Order {
   user: User;
 
   @Column('varchar', { length: 255 })
-  status: string; // pending, shipped, delivered, cancelled
+  status: string; // placed, shipped, delivered, cancelled, refunded
 
   @Column('decimal', { precision: 10, scale: 2 })
   total: number;
