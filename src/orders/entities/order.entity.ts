@@ -2,48 +2,56 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { Product } from '../../products/entity/product.entity';
+import { Payment } from '../../payments/entities/payment.entity'; // Payment 엔티티 임포트
 import { User } from '../../users/user.entity';
+import { OrderItem } from './order-item.entity';
 
-@Entity({ name: 'orders', schema: 'orders' })
+export enum OrderStatus {
+  PENDING = 'PENDING', // 결제 대기 중
+  PAID = 'PAID', // 결제 완료
+  PROCESSING = 'PROCESSING', // 상품 준비 중 (재고 확보, 포장)
+  SHIPPING = 'SHIPPING', // 배송 중
+  DELIVERED = 'DELIVERED', // 배송 완료
+  CANCELED = 'CANCELED', // 주문 취소
+  REFUNDED = 'REFUNDED', // 환불 완료 (부분 환불 포함)
+}
+
+@Entity('orders') // 데이터베이스 테이블 이름을 'orders'로 지정
 export class Order {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid') // UUID 형식의 기본 키
+  id: string;
 
   @ManyToOne(() => User, (user) => user.orders)
+  @JoinColumn({ name: 'userId' }) // 외래 키 컬럼명 지정
   user: User;
+  @Column({ type: 'uuid' })
+  userId: string;
 
-  @Column('varchar', { length: 255 })
-  status: string; // placed, shipped, delivered, cancelled, refunded
+  @Column({ type: 'int' }) // 총 주문 금액 (소수점 처리를 위해 Decimal 또는 float 고려 가능)
+  totalAmount: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
-  total: number;
+  @Column({
+    type: 'enum',
+    enum: OrderStatus,
+    default: OrderStatus.PENDING, // 초기 주문 상태는 결제 대기
+  })
+  status: OrderStatus;
+
+  @OneToMany(() => Payment, (payment) => payment.order)
+  payments: Payment[];
+
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.order)
+  orderItems: OrderItem[];
 
   @CreateDateColumn()
   createdAt: Date;
 
-  @OneToMany(() => OrderItem, (item) => item.order, { cascade: true })
-  items: OrderItem[];
-}
-
-@Entity({ name: 'order_items', schema: 'orders' })
-export class OrderItem {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @ManyToOne(() => Order, (order) => order.items)
-  order: Order;
-
-  @ManyToOne(() => Product, (product) => product.id)
-  product: Product;
-
-  @Column('int')
-  quantity: number;
-
-  @Column('decimal', { precision: 10, scale: 2 })
-  price: number;
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
