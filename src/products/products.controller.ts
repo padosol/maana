@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Logger,
   Param,
   Post,
   Put,
@@ -15,35 +16,9 @@ import { ProductsService } from './products.service';
 
 @Controller('products')
 export class ProductsController {
+  private readonly logger = new Logger(ProductsController.name);
+
   constructor(private readonly productsService: ProductsService) {}
-
-  @Post()
-  createProduct(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.createProduct(createProductDto);
-  }
-
-  @Get()
-  findAllProducts() {
-    return this.productsService.findAllProducts();
-  }
-
-  @Get(':id')
-  findProductById(@Param('id') id: number) {
-    return this.productsService.findProductById(id);
-  }
-
-  @Put(':id')
-  updateProduct(
-    @Param('id') id: number,
-    @Body() updateProductDto: UpdateProductDto,
-  ) {
-    return this.productsService.updateProduct(id, updateProductDto);
-  }
-
-  @Delete(':id')
-  deleteProduct(@Param('id') id: number) {
-    return this.productsService.deleteProduct(id);
-  }
 
   @Post('categories')
   createCategory(@Body() createCategoryDto: CreateCategoryDto) {
@@ -71,5 +46,34 @@ export class ProductsController {
   @Delete('categories/:id')
   deleteCategory(@Param('id') id: number) {
     return this.productsService.deleteCategory(id);
+  }
+
+  @Post()
+  createProduct(@Body() createProductDto: CreateProductDto) {
+    return this.productsService.createProduct(createProductDto);
+  }
+
+  @Get()
+  findAllProducts() {
+    return this.productsService.findAllProducts();
+  }
+
+  @Get(':id')
+  findProductById(@Param('id') id: number) {
+    this.logger.log(`Finding product by id: ${id}`);
+    return this.productsService.findProductById(id);
+  }
+
+  @Put(':id')
+  updateProduct(
+    @Param('id') id: number,
+    @Body() updateProductDto: UpdateProductDto,
+  ) {
+    return this.productsService.updateProduct(id, updateProductDto);
+  }
+
+  @Delete(':id')
+  deleteProduct(@Param('id') id: number) {
+    return this.productsService.deleteProduct(id);
   }
 }
