@@ -22,7 +22,7 @@ export enum OrderStatus {
   REFUNDED = 'REFUNDED', // 환불 완료 (부분 환불 포함)
 }
 
-@Entity('orders') // 데이터베이스 테이블 이름을 'orders'로 지정
+@Entity({ name: 'orders', schema: 'orders' }) // 데이터베이스 테이블 이름을 'orders'로 지정
 export class Order {
   @PrimaryGeneratedColumn('uuid') // UUID 형식의 기본 키
   id: string;

@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { Order } from './order.entity';
 
-@Entity('order_items')
+@Entity({ name: 'order_items', schema: 'orders' })
 export class OrderItem {
   @PrimaryGeneratedColumn()
   id: number;
