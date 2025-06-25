@@ -5,7 +5,7 @@ import { Role } from 'src/auth/roles/role.enum';
 import { Roles } from 'src/auth/roles/roles.decorator';
 import { JwtGuard } from '../auth/jwt/jwt.guard';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 
 @Controller('users')

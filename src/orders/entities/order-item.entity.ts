@@ -1,10 +1,12 @@
 import { Product } from 'src/products/entity/product.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Order } from './order.entity';
 
@@ -12,6 +14,13 @@ import { Order } from './order.entity';
 export class OrderItem {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @ManyToOne(() => Order, (order) => order.orderItems)
+  @JoinColumn({ name: 'orderId' })
+  order: Order;
+
+  @Column()
+  orderId: string;
 
   @ManyToOne(() => Product, (product) => product.id)
   @JoinColumn({ name: 'productId' })
@@ -21,12 +30,17 @@ export class OrderItem {
   productId: number; // 주문 상품 ID
 
   @Column()
-  quantity: number;
-
-  @ManyToOne(() => Order, (order) => order.orderItems)
-  @JoinColumn({ name: 'orderId' })
-  order: Order;
+  unitPrice: number;
 
   @Column()
-  orderId: string;
+  quantity: number;
+
+  @Column()
+  totalPrice: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

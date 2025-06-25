@@ -5,7 +5,8 @@ import { ProductsService } from '../products/products.service';
 import { UsersService } from '../users/users.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
-import { Order, OrderItem } from './entities/order.entity';
+import { OrderItem } from './entities/order-item.entity';
+import { Order, OrderStatus } from './entities/order.entity';
 
 @Injectable()
 export class OrdersService {
@@ -36,19 +37,20 @@ export class OrdersService {
       }
 
       const orderItem = this.orderItemRepository.create({
-        product,
+        productId: product.id,
+        unitPrice: product.price,
         quantity: item.quantity,
-        price: product.price,
+        totalPrice: product.price * item.quantity,
       });
       orderItems.push(orderItem);
-      total += orderItem.price;
+      total += orderItem.totalPrice;
     }
 
     const order = this.orderRepository.create({
       user,
-      status: 'placed',
-      items: orderItems,
-      total,
+      status: OrderStatus.PENDING,
+      orderItems: orderItems,
+      totalAmount: total,
     });
 
     return this.orderRepository.save(order);
@@ -56,11 +58,11 @@ export class OrdersService {
 
   async findAll(): Promise<Order[]> {
     return this.orderRepository.find({
-      relations: ['user', 'items', 'items.product'],
+      relations: ['user', 'orderItems'],
     });
   }
 
-  async findOne(id: number): Promise<Order> {
+  async findOne(id: string): Promise<Order> {
     const order = await this.orderRepository.findOne({
       where: { id },
       relations: ['user', 'items', 'items.product'],
@@ -72,7 +74,7 @@ export class OrdersService {
   }
 
   async updateOrderStatus(
-    id: number,
+    id: string,
     updateOrderStatusDto: UpdateOrderStatusDto,
   ): Promise<Order> {
     const order = await this.findOne(id);
@@ -84,7 +86,7 @@ export class OrdersService {
     return this.orderRepository.save(order);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     const order = await this.findOne(id);
     if (!order) {
       throw new NotFoundException('Order not found');

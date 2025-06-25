@@ -3,7 +3,7 @@ import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 export class CreatePaymentReqDto {
   @IsNotEmpty()
   @IsString()
-  orderId: string;
+  orderId: number;
 
   @IsNotEmpty()
   @IsString()

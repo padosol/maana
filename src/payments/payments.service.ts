@@ -3,9 +3,12 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfirmPaymentDto } from './dto/confirm.payment.dto';
-import { CreatePaymentReqDto } from './dto/request/create-payment.req.dto';
-import { PaymentResDto } from './dto/response/payment.res.dto';
-import { Payment } from './entities/payment.entity';
+import {
+  Payment,
+  PaymentMethod,
+  PaymentStatus,
+} from './entities/payment.entity';
+import { TossPaymentResponseDto } from './type/toss.payment';
 
 @Injectable()
 export class PaymentsService {
@@ -34,6 +37,8 @@ export class PaymentsService {
   }
 
   async confirmPayment(confirmPaymentDto: ConfirmPaymentDto): Promise<boolean> {
+    const { paymentsKey, orderId, amount } = confirmPaymentDto;
+
     const encodedSecret = Buffer.from(`${this.tossSecretKey}:`).toString(
       'base64',
     );
@@ -45,25 +50,43 @@ export class PaymentsService {
         Authorization: `Basic ${encodedSecret}`,
       },
       body: JSON.stringify({
-        paymentKey: confirmPaymentDto.paymentsKey,
-        orderId: confirmPaymentDto.orderId,
-        amount: confirmPaymentDto.amount,
+        paymentKey: paymentsKey,
+        orderId: orderId,
+        amount: amount,
       }),
     })
-      .then((res) => {
-        this.logger.log(`결제 승인 성공: ${JSON.stringify(res)}`);
+      .then(async (res) => {
+        const data: TossPaymentResponseDto =
+          (await res.json()) as TossPaymentResponseDto;
+
+        this.logger.log(`결제 승인 성공: ${JSON.stringify(data)}`);
+
+        const payment = this.paymentRepository.create({
+          orderId: Number(data.orderId),
+          paymentMethod: PaymentMethod.CARD,
+          amount: data.totalAmount,
+          status: PaymentStatus.COMPLETED,
+          paymentKey: data.paymentKey,
+        });
+
+        await this.paymentRepository.save(payment);
+
         return true;
       })
-      .catch((err) => {
+      .catch(async (err) => {
         this.logger.error(err);
+
+        const payment = this.paymentRepository.create({
+          orderId: orderId,
+          paymentMethod: PaymentMethod.CARD,
+          amount: amount,
+          status: PaymentStatus.FAILED,
+          paymentKey: paymentsKey,
+        });
+
+        await this.paymentRepository.save(payment);
+
         return false;
       });
-  }
-
-  async createPayment(
-    createPaymentDto: CreatePaymentReqDto,
-  ): Promise<PaymentResDto> {
-    const payment = this.paymentRepository.create(createPaymentDto);
-    return this.paymentRepository.save(payment);
   }
 }
