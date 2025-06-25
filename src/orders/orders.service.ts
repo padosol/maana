@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProductsService } from '../products/products.service';
@@ -18,6 +18,8 @@ export class OrdersService {
     private userService: UsersService,
     private productService: ProductsService,
   ) {}
+
+  private readonly logger = new Logger(OrdersService.name);
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
     const { userId, items } = createOrderDto;
@@ -65,7 +67,7 @@ export class OrdersService {
   async findOne(id: string): Promise<Order> {
     const order = await this.orderRepository.findOne({
       where: { id },
-      relations: ['user', 'items', 'items.product'],
+      relations: ['user', 'orderItems'],
     });
     if (!order) {
       throw new NotFoundException('Order not found');
@@ -87,6 +89,8 @@ export class OrdersService {
   }
 
   async remove(id: string): Promise<void> {
+    this.logger.log(`Removing order with id: ${id}`);
+
     const order = await this.findOne(id);
     if (!order) {
       throw new NotFoundException('Order not found');
