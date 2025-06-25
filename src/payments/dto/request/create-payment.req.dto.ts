@@ -6,10 +6,6 @@ export class CreatePaymentReqDto {
   orderId: number;
 
   @IsNotEmpty()
-  @IsString()
-  paymentKey: string;
-
-  @IsNotEmpty()
   @IsNumber()
   amount: number;
 }

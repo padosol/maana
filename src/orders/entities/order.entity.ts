@@ -8,7 +8,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Payment } from '../../payments/entities/payment.entity'; // Payment 엔티티 임포트
 import { User } from '../../users/entities/user.entity';
 import { OrderItem } from './order-item.entity';
 
@@ -43,10 +42,8 @@ export class Order {
   })
   status: OrderStatus;
 
-  @OneToMany(() => Payment, (payment) => payment.orderId)
-  payments: Payment[];
-
   @OneToMany(() => OrderItem, (orderItem) => orderItem.order, {
+    onDelete: 'CASCADE',
     cascade: true,
   })
   orderItems: OrderItem[];
@@ -56,4 +53,12 @@ export class Order {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  completePayment() {
+    this.status = OrderStatus.PAID;
+  }
+
+  cancelPayment() {
+    this.status = OrderStatus.CANCELED;
+  }
 }

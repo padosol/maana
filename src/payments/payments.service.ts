@@ -1,13 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { ConfirmPaymentDto } from './dto/confirm.payment.dto';
 import {
-  Payment,
-  PaymentMethod,
-  PaymentStatus,
-} from './entities/payment.entity';
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { OrderStatus } from 'src/orders/entities/order.entity';
+import { OrdersService } from 'src/orders/orders.service';
+import { ProductsService } from 'src/products/products.service';
+import { ConfirmPaymentDto } from './dto/request/confirm.payment.dto';
 import { TossPaymentResponseDto } from './type/toss.payment';
 
 @Injectable()
@@ -18,8 +19,8 @@ export class PaymentsService {
 
   constructor(
     private readonly configService: ConfigService,
-    @InjectRepository(Payment)
-    private readonly paymentRepository: Repository<Payment>,
+    private readonly ordersService: OrdersService,
+    private readonly productsService: ProductsService,
   ) {
     this.tossSecretKey = this.configService.get<string>('TOSS_SECRET_KEY');
     if (!this.tossSecretKey) {
@@ -37,7 +38,20 @@ export class PaymentsService {
   }
 
   async confirmPayment(confirmPaymentDto: ConfirmPaymentDto): Promise<boolean> {
-    const { paymentsKey, orderId, amount } = confirmPaymentDto;
+    const { paymentKey, orderId, amount } = confirmPaymentDto;
+
+    const order = await this.ordersService.findOne(orderId);
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    if (order.status !== OrderStatus.PENDING) {
+      throw new BadRequestException('Order is not pending');
+    }
+
+    if (order.totalAmount !== amount) {
+      throw new BadRequestException('Amount is not correct');
+    }
 
     const encodedSecret = Buffer.from(`${this.tossSecretKey}:`).toString(
       'base64',
@@ -50,7 +64,7 @@ export class PaymentsService {
         Authorization: `Basic ${encodedSecret}`,
       },
       body: JSON.stringify({
-        paymentKey: paymentsKey,
+        paymentKey: paymentKey,
         orderId: orderId,
         amount: amount,
       }),
@@ -61,30 +75,26 @@ export class PaymentsService {
 
         this.logger.log(`결제 승인 성공: ${JSON.stringify(data)}`);
 
-        const payment = this.paymentRepository.create({
-          orderId: Number(data.orderId),
-          paymentMethod: PaymentMethod.CARD,
-          amount: data.totalAmount,
-          status: PaymentStatus.COMPLETED,
-          paymentKey: data.paymentKey,
-        });
+        // 재고 감소
+        for (const item of order.orderItems) {
+          const product = await this.productsService.findProductById(
+            item.productId,
+          );
+          if (!product) {
+            throw new NotFoundException('Product not found');
+          }
 
-        await this.paymentRepository.save(payment);
+          product.decreaseStock(item.quantity);
+          await this.productsService.updateProduct(product.id, product);
+        }
+
+        order.completePayment();
+        await this.ordersService.updateOrderStatus(order.id, order);
 
         return true;
       })
       .catch(async (err) => {
-        this.logger.error(err);
-
-        const payment = this.paymentRepository.create({
-          orderId: orderId,
-          paymentMethod: PaymentMethod.CARD,
-          amount: amount,
-          status: PaymentStatus.FAILED,
-          paymentKey: paymentsKey,
-        });
-
-        await this.paymentRepository.save(payment);
+        this.logger.error(`결제 승인 실패: ${err}`);
 
         return false;
       });
