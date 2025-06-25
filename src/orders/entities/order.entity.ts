@@ -46,7 +46,9 @@ export class Order {
   @OneToMany(() => Payment, (payment) => payment.orderId)
   payments: Payment[];
 
-  @OneToMany(() => OrderItem, (orderItem) => orderItem.order)
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.order, {
+    cascade: true,
+  })
   orderItems: OrderItem[];
 
   @CreateDateColumn()

@@ -16,8 +16,8 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('API Documentation')
-    .setDescription('API documentation for your application')
+    .setTitle('Ecommerce API Documentation')
+    .setDescription('API documentation for Ecommerce application')
     .setVersion('1.0')
     .addBearerAuth() // Enable JWT Bearer Auth for Swagger
     .build();
