@@ -6,9 +6,10 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
-import { OrderStatus } from 'src/orders/entities/order.entity';
+import { Order, OrderStatus } from 'src/orders/entities/order.entity';
 import { OrdersService } from 'src/orders/orders.service';
 import { ProductsService } from 'src/products/products.service';
+import { DataSource } from 'typeorm';
 import { ConfirmPaymentDto } from './dto/request/confirm.payment.dto';
 import { TossPaymentResponseDto } from './type/toss.payment';
 
@@ -22,6 +23,7 @@ export class PaymentsService {
     private readonly configService: ConfigService,
     private readonly ordersService: OrdersService,
     private readonly productsService: ProductsService,
+    private readonly dataSource: DataSource,
   ) {
     this.tossSecretKey = this.configService.get<string>('TOSS_SECRET_KEY');
     if (!this.tossSecretKey) {
@@ -71,29 +73,7 @@ export class PaymentsService {
       }),
     })
       .then(async (res) => {
-        const json: unknown = await res.json();
-        const data: TossPaymentResponseDto = plainToInstance(
-          TossPaymentResponseDto,
-          json,
-        );
-
-        this.logger.log(`결제 승인 성공: ${JSON.stringify(data)}`);
-
-        // 재고 감소
-        for (const item of order.orderItems) {
-          const product = await this.productsService.findProductById(
-            item.productId,
-          );
-          if (!product) {
-            throw new NotFoundException('Product not found');
-          }
-
-          product.decreaseStock(item.quantity);
-          await this.productsService.updateProduct(product.id, product);
-        }
-
-        order.completePayment();
-        await this.ordersService.updateOrderStatus(order.id, order);
+        await this.successPayment(order, res);
 
         return true;
       })
@@ -102,5 +82,44 @@ export class PaymentsService {
 
         return false;
       });
+  }
+
+  async successPayment(order: Order, res: Response) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    const json: unknown = await res.json();
+    const data: TossPaymentResponseDto = plainToInstance(
+      TossPaymentResponseDto,
+      json,
+    );
+
+    this.logger.log(`결제 승인 성공: ${JSON.stringify(data)}`);
+
+    try {
+      // 재고 감소
+      for (const item of order.orderItems) {
+        const product = await this.productsService.findProductById(
+          item.productId,
+        );
+        if (!product) {
+          throw new NotFoundException('Product not found');
+        }
+
+        product.decreaseStock(item.quantity);
+        await this.productsService.updateProduct(product.id, product);
+      }
+
+      order.completePayment();
+      await this.ordersService.updateOrderStatus(order.id, order);
+
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
