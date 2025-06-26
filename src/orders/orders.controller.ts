@@ -4,8 +4,8 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
+  Put,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -34,7 +34,7 @@ export class OrdersController {
     return this.ordersService.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @ApiOperation({ summary: '주문 상태 업데이트 API' })
   updateOrderStatus(
     @Param('id') id: string,

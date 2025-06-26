@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Category } from './category.entity';
 
@@ -20,4 +21,13 @@ export class Product {
 
   @ManyToOne(() => Category, (category) => category.products)
   category: Category;
+
+  // 재고 감소 함수 구현
+  decreaseStock(quantity: number) {
+    if (this.quantity < quantity) {
+      throw new BadRequestException('Stock is not enough');
+    }
+
+    this.quantity -= quantity;
+  }
 }

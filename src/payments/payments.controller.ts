@@ -1,5 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ConfirmPaymentDto } from './dto/confirm.payment.dto';
+import { ConfirmPaymentDto } from './dto/request/confirm.payment.dto';
 import { PaymentsService } from './payments.service';
 
 @Controller({

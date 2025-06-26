@@ -15,5 +15,6 @@ import { OrdersService } from './orders.service';
     UsersModule,
     ProductsModule,
   ],
+  exports: [OrdersService],
 })
 export class OrdersModule {}
