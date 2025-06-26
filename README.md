@@ -130,8 +130,7 @@ http://localhost:3000/api-docs
 - `paymentKey`: PG사 결제 키
 - `orderId`: 주문 ID (관계)
 - `method`: 결제 수단 (CARD, VIRTUAL_ACCOUNT, TRANSFER, EASY_PAY, PHONE, POINT)
-- `amount`: 결제 금액
-- `status`: 결제 상태 (READY, PENDING, DONE, CANCELED, PARTIAL_CANCELED, FAILED, ABORTED)
+- `amount`: 결제 금액.;'pl-0'
 
 ## ERD
 

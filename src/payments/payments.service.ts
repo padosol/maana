@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
 import { Order, OrderStatus } from 'src/orders/entities/order.entity';
 import { OrdersService } from 'src/orders/orders.service';
-import { ProductsService } from 'src/products/products.service';
+import { Product } from 'src/products/entity/product.entity';
 import { DataSource } from 'typeorm';
 import { ConfirmPaymentDto } from './dto/request/confirm.payment.dto';
 import { TossPaymentResponseDto } from './type/toss.payment';
@@ -22,7 +22,6 @@ export class PaymentsService {
   constructor(
     private readonly configService: ConfigService,
     private readonly ordersService: OrdersService,
-    private readonly productsService: ProductsService,
     private readonly dataSource: DataSource,
   ) {
     this.tossSecretKey = this.configService.get<string>('TOSS_SECRET_KEY');
@@ -100,19 +99,23 @@ export class PaymentsService {
     try {
       // 재고 감소
       for (const item of order.orderItems) {
-        const product = await this.productsService.findProductById(
-          item.productId,
-        );
+        const product = await queryRunner.manager
+          .getRepository(Product)
+          .createQueryBuilder('product')
+          .setLock('pessimistic_write')
+          .where('product.id = :id', { id: item.productId })
+          .getOne();
+
         if (!product) {
           throw new NotFoundException('Product not found');
         }
 
         product.decreaseStock(item.quantity);
-        await this.productsService.updateProduct(product.id, product);
+        await queryRunner.manager.save(product);
       }
 
       order.completePayment();
-      await this.ordersService.updateOrderStatus(order.id, order);
+      await queryRunner.manager.save(order);
 
       await queryRunner.commitTransaction();
     } catch (error) {
