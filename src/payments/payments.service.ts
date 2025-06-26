@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { plainToInstance } from 'class-transformer';
 import { OrderStatus } from 'src/orders/entities/order.entity';
 import { OrdersService } from 'src/orders/orders.service';
 import { ProductsService } from 'src/products/products.service';
@@ -70,8 +71,11 @@ export class PaymentsService {
       }),
     })
       .then(async (res) => {
-        const data: TossPaymentResponseDto =
-          (await res.json()) as TossPaymentResponseDto;
+        const json: unknown = await res.json();
+        const data: TossPaymentResponseDto = plainToInstance(
+          TossPaymentResponseDto,
+          json,
+        );
 
         this.logger.log(`결제 승인 성공: ${JSON.stringify(data)}`);
 
