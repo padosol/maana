@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
-import { OrdersModule } from './orders/orders.module';
+import { AuthModule } from './auth/application/auth.module';
+import { OrdersModule } from './orders/application/orders.module';
 import { PaymentsModule } from './payments/payments.module';
-import { ProductsModule } from './products/products.module';
+import { ProductsModule } from './products/application/products.module';
 import { UsersModule } from './users/users.module';
 
 @Module({

@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
+import { OrdersService } from 'src/orders/application/orders.service';
 import { Order, OrderStatus } from 'src/orders/entities/order.entity';
-import { OrdersService } from 'src/orders/orders.service';
 import { Product } from 'src/products/entity/product.entity';
 import { DataSource } from 'typeorm';
 import { ConfirmPaymentDto } from './dto/request/confirm.payment.dto';

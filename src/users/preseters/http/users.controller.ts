@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
-import { Role } from 'src/auth/roles/role.enum';
-import { Roles } from 'src/auth/roles/roles.decorator';
-import { JwtGuard } from '../../../auth/jwt/jwt.guard';
+import { Role } from 'src/auth/presenters/roles/role.enum';
+import { Roles } from 'src/auth/presenters/roles/roles.decorator';
+import { JwtGuard } from '../../../auth/presenters/jwt/jwt.guard';
 import { UsersService } from '../../application/users.service';
 import { User } from '../../entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
