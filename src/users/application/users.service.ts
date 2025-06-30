@@ -71,4 +71,18 @@ export class UsersService {
 
     return this.usersRepository.remove(id);
   }
+
+  async validateUser(email: string, password: string): Promise<Users | null> {
+    const user = await this.findOneByEmail(email);
+
+    if (
+      user &&
+      user.password &&
+      (await bcrypt.compare(password, user.password))
+    ) {
+      return user;
+    }
+
+    return null;
+  }
 }
