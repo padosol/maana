@@ -3,10 +3,10 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
 import { Role } from 'src/auth/roles/role.enum';
 import { Roles } from 'src/auth/roles/roles.decorator';
-import { JwtGuard } from '../auth/jwt/jwt.guard';
+import { JwtGuard } from '../../../auth/jwt/jwt.guard';
+import { UsersService } from '../../application/users.service';
+import { User } from '../../entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './entities/user.entity';
-import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
