@@ -25,10 +25,10 @@ export class OrderMapper {
     return {
       id: order.id,
       userId: order.userId,
-      orderItems: order.items.map((item) =>
+      orderItems: order.orderItems.map((item) =>
         OrderItemMapper.toPersistence(item),
       ),
-      total: new Decimal(order.total),
+      total: new Decimal(order.totalAmount),
       status: order.status,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt ?? new Date(),

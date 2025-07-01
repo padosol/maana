@@ -1,7 +1,8 @@
-import { Users } from '@prisma/client';
+import { Users as PrismaUsers } from '@prisma/client';
+import { Users } from 'src/users/domain/users';
 
 export class UsersMapper {
-  static toDomain(user: Users): Users {
+  static toDomain(user: PrismaUsers): Users {
     return new Users(
       user.id,
       user.email,

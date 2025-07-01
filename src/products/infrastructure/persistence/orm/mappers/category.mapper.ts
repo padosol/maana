@@ -13,7 +13,7 @@ export class CategoryMapper {
 
   static toPersistence(category: Category): PrismaCategory {
     return {
-      id: category.id,
+      id: category.id!,
       name: category.name,
       description: category.description,
       parentId: category.parentId,

@@ -9,7 +9,7 @@ export class ProductsFactory {
       null,
       product.name,
       new Decimal(product.price),
-      product.description,
+      product.description || '',
       product.stock,
       new Category(product.categoryId, '', '', null),
       null,

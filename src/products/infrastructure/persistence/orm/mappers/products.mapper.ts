@@ -22,14 +22,14 @@ export class ProductsMapper {
 
   static toPersistence(product: Product): PrismaProducts {
     return {
-      id: product.id,
+      id: product.id!,
       name: product.name,
       price: product.price,
       description: product.description,
       stock: product.stock,
       imageUrl: product.imageUrl ?? '',
       isActive: true,
-      categoryId: product.category.id,
+      categoryId: product.category.id!,
     };
   }
 }

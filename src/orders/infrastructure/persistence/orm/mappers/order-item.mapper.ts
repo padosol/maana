@@ -16,10 +16,10 @@ export class OrderItemMapper {
 
   static toPersistence(orderItem: OrderItem): PrismaOrderItem {
     return {
-      id: orderItem.id,
+      id: orderItem.id!,
       orderId: orderItem.orderId,
       productId: orderItem.productId,
-      quantity: orderItem.quantity,
+      quantity: orderItem.stock,
       unitPrice: new Decimal(orderItem.unitPrice),
       totalPrice: new Decimal(orderItem.totalPrice),
     };

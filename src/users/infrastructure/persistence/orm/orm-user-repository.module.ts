@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { PrismaModule } from 'src/prisma/prisma.module';
 import { UsersReposiotry } from 'src/users/application/ports/users.respository';
 import { OrmUsersRepository } from './repository/user.repository';
 
@@ -9,6 +10,7 @@ import { OrmUsersRepository } from './repository/user.repository';
       useClass: OrmUsersRepository,
     },
   ],
+  imports: [PrismaModule],
   exports: [UsersReposiotry],
 })
 export class OrmUserRepositoryModule {}

@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
-import { OrmProductsPersistence } from './persistence/orm/products.persistence';
+import { OrmProductsPersistenceModule } from './persistence/orm/orm-products-persistence.module';
 
 @Module({
-  imports: [OrmProductsPersistence],
+  imports: [OrmProductsPersistenceModule],
+  exports: [OrmProductsPersistenceModule],
 })
 export class ProductsInfrastructureModule {}

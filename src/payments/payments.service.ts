@@ -7,9 +7,10 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
 import { OrdersService } from 'src/orders/application/orders.service';
-import { Order, OrderStatus } from 'src/orders/entities/order.entity';
-import { Product } from 'src/products/entity/product.entity';
-import { DataSource } from 'typeorm';
+import { Order } from 'src/orders/domain/order';
+import { OrderStatus } from 'src/orders/domain/value-object/order-status.enum';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { ProductsService } from 'src/products/application/products.service';
 import { ConfirmPaymentDto } from './dto/request/confirm.payment.dto';
 import { TossPaymentResponseDto } from './type/toss.payment';
 
@@ -22,7 +23,8 @@ export class PaymentsService {
   constructor(
     private readonly configService: ConfigService,
     private readonly ordersService: OrdersService,
-    private readonly dataSource: DataSource,
+    private readonly prisma: PrismaService,
+    private readonly productsService: ProductsService,
   ) {
     this.tossSecretKey = this.configService.get<string>('TOSS_SECRET_KEY');
     if (!this.tossSecretKey) {
@@ -84,10 +86,6 @@ export class PaymentsService {
   }
 
   async successPayment(order: Order, res: Response) {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
     const json: unknown = await res.json();
     const data: TossPaymentResponseDto = plainToInstance(
       TossPaymentResponseDto,
@@ -96,33 +94,27 @@ export class PaymentsService {
 
     this.logger.log(`결제 승인 성공: ${JSON.stringify(data)}`);
 
-    try {
-      // 재고 감소
-      for (const item of order.orderItems) {
-        const product = await queryRunner.manager
-          .getRepository(Product)
-          .createQueryBuilder('product')
-          .setLock('pessimistic_write')
-          .where('product.id = :id', { id: item.productId })
-          .getOne();
+    // 재고 감소
+    for (const item of order.orderItems) {
+      const product = await this.productsService.findProductById(
+        item.productId,
+      );
 
-        if (!product) {
-          throw new NotFoundException('Product not found');
-        }
-
-        product.decreaseStock(item.quantity);
-        await queryRunner.manager.save(product);
+      if (!product) {
+        throw new NotFoundException('Product not found');
       }
 
-      order.completePayment();
-      await queryRunner.manager.save(order);
-
-      await queryRunner.commitTransaction();
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
+      product.decreaseStock(item.stock);
+      await this.prisma.products.update({
+        where: { id: item.productId },
+        data: { stock: product.stock },
+      });
     }
+
+    order.completePayment();
+    await this.prisma.orders.update({
+      where: { id: order.id },
+      data: { status: OrderStatus.COMPLETED.toString() }, // TODO: 추후 수정
+    });
   }
 }

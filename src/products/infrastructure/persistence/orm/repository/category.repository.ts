@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CategoryRepository } from 'src/products/application/ports/category.repository';
 import { Category } from 'src/products/domain/category';
 import { CategoryMapper } from '../mappers/category.mapper';
 
 @Injectable()
 export class OrmCategoryPersistence implements CategoryRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(category: Category): Promise<Category> {
     const categoryData = CategoryMapper.toPersistence(category);

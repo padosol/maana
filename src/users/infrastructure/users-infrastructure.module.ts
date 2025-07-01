@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
-import { OrmUsersRepository } from './persistence/orm/repository/user.repository';
+import { OrmUserRepositoryModule } from './persistence/orm/orm-user-repository.module';
 
 @Module({
-  providers: [],
-  exports: [OrmUsersRepository],
-  imports: [OrmUsersRepository],
+  imports: [OrmUserRepositoryModule],
+  exports: [OrmUserRepositoryModule],
 })
 export class UsersInfrastructureModule {}

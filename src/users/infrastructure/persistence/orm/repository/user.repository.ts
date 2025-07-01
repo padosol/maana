@@ -12,8 +12,10 @@ export class OrmUsersRepository implements UsersReposiotry {
     const createdUser = await this.prismaService.users.create({
       data: {
         email: user.email,
-        password: user.password,
-        role: user.role,
+        password: user.password!,
+        role: user.role!,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     });
 
@@ -49,8 +51,8 @@ export class OrmUsersRepository implements UsersReposiotry {
       where: { id },
       data: {
         email: user.email,
-        password: user.password,
-        role: user.role,
+        password: user.password!,
+        role: user.role!,
       },
     });
 

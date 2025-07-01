@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { ProductsRepository } from 'src/products/application/ports/products.repository';
 import { Product } from 'src/products/domain/products';
 import { ProductsMapper } from '../mappers/products.mapper';
 
 @Injectable()
 export class OrmProductsPersistence implements ProductsRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findAll(): Promise<Product[]> {
     const products = await this.prisma.products.findMany({
