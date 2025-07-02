@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/application/auth.module';
 import { OrdersModule } from './orders/application/orders.module';
-import { PaymentsModule } from './payments/payments.module';
+import { PaymentsModule } from './payments/application/payments.module';
 import { ProductsModule } from './products/application/products.module';
 import { UsersModule } from './users/application/users.module';
 
