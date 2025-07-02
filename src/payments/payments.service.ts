@@ -12,7 +12,7 @@ import { OrderStatus } from 'src/orders/domain/value-object/order-status.enum';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ProductsService } from 'src/products/application/products.service';
 import { UpdateProductDto } from 'src/products/presenters/http/dto/update-product.dto';
-import { ConfirmPaymentDto } from './dto/request/confirm.payment.dto';
+import { ConfirmPaymentDto } from './presenters/http/dto/request/confirm.payment.dto';
 import { TossPaymentResponseDto } from './type/toss.payment';
 
 @Injectable()
