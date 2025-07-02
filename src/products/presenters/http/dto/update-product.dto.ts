@@ -40,5 +40,5 @@ export class UpdateProductDto {
     description: 'The category ID of the product',
     example: 1,
   })
-  categoryId: bigint;
+  categoryId: number;
 }

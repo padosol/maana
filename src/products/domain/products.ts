@@ -4,7 +4,7 @@ import { Category } from './category';
 
 export class Product {
   constructor(
-    public readonly id: bigint | null,
+    public readonly id: number | null,
     public name: string,
     public price: Decimal,
     public description: string,
