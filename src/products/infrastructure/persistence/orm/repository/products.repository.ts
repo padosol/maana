@@ -26,10 +26,11 @@ export class OrmProductsPersistence implements ProductsRepository {
   }
 
   async create(product: Product): Promise<Product> {
-    const productData = ProductsMapper.toPersistence(product);
+    const { name, price, description, stock, categoryId } =
+      ProductsMapper.toPersistence(product);
 
     const createdProduct = await this.prisma.products.create({
-      data: productData,
+      data: { name, price, description, stock, categoryId },
       include: { category: true },
     });
 

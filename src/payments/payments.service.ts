@@ -17,7 +17,9 @@ import { TossPaymentResponseDto } from './type/toss.payment';
 
 @Injectable()
 export class PaymentsService {
-  private readonly logger = new Logger(PaymentsService.name);
+  private readonly logger = new Logger(PaymentsService.name, {
+    timestamp: true,
+  });
   private readonly tossUrl: string | undefined;
   private readonly tossSecretKey: string | undefined;
 
@@ -43,6 +45,7 @@ export class PaymentsService {
   }
 
   async confirmPayment(confirmPaymentDto: ConfirmPaymentDto): Promise<boolean> {
+    this.logger.log('confirmPayment Start');
     const { paymentKey, orderId, amount } = confirmPaymentDto;
 
     const order = await this.ordersService.findOne(orderId);
@@ -62,7 +65,9 @@ export class PaymentsService {
       'base64',
     );
 
-    return await fetch(`${this.tossUrl}/confirm`, {
+    this.logger.log(`encodedSecret: ${encodedSecret}`);
+
+    const response = await fetch(`${this.tossUrl}/confirm`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -73,27 +78,28 @@ export class PaymentsService {
         orderId: orderId,
         amount: amount,
       }),
-    })
-      .then(async (res) => {
-        await this.successPayment(order, res);
+    });
 
-        return true;
-      })
-      .catch(async (err) => {
-        this.logger.error(`결제 승인 실패: ${err}`);
+    const json = JSON.stringify(await response.json());
 
-        return false;
-      });
+    if (!response.ok) {
+      this.logger.error(`Payment confirmation failed: ${json}`);
+      throw new BadRequestException('Payment confirmation failed');
+    }
+
+    const data = plainToInstance(TossPaymentResponseDto, JSON.parse(json));
+
+    this.logger.log(`data: ${JSON.stringify(data)}`);
+
+    await this.successPayment(order, data);
+
+    return true;
   }
 
-  async successPayment(order: Order, res: Response) {
-    await this.prisma.$transaction(async (tx) => {
-      const json: unknown = await res.json();
-      const data: TossPaymentResponseDto = plainToInstance(
-        TossPaymentResponseDto,
-        json,
-      );
+  async successPayment(order: Order, data: TossPaymentResponseDto) {
+    this.logger.log('successPayment Start');
 
+    await this.prisma.$transaction(async (tx) => {
       this.logger.log(`결제 승인 성공: ${JSON.stringify(data)}`);
 
       // 재고 감소
@@ -114,10 +120,7 @@ export class PaymentsService {
       }
 
       order.completePayment();
-      await tx.orders.update({
-        where: { id: order.id },
-        data: { status: OrderStatus.COMPLETED.toString() }, // TODO: 추후 수정
-      });
+      await this.ordersService.updateOrderStatus(order.id, order);
     });
   }
 }

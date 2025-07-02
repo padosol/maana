@@ -9,12 +9,26 @@ export class OrmOrderRepository implements OrderRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(order: Order): Promise<Order> {
-    const orderOrm = OrderMapper.toPersistence(order);
+    const { id, userId, orderItems, total, status, createdAt, updatedAt } =
+      OrderMapper.toPersistence(order);
     const createdOrder = await this.prisma.orders.create({
       data: {
-        ...orderOrm,
+        id,
+        userId,
+        total,
+        status,
+        createdAt,
+        updatedAt,
         orderItems: {
-          create: orderOrm.orderItems,
+          create: orderItems.map((item) => {
+            const { id, orderId, productId, ...rest } = item;
+            return {
+              ...rest,
+              product: {
+                connect: { id: productId },
+              },
+            };
+          }),
         },
       },
       include: {
@@ -35,7 +49,7 @@ export class OrmOrderRepository implements OrderRepository {
 
   async findOne(id: number): Promise<Order | null> {
     const order = await this.prisma.orders.findUnique({
-      where: { id },
+      where: { id: Number(id) },
       include: {
         orderItems: true,
       },
