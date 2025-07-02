@@ -41,7 +41,7 @@ export class SnowflakeIdGenerator {
    * 다음 Snowflake ID를 생성합니다.
    * @returns 생성된 Snowflake ID (string)
    */
-  public nextId(): bigint {
+  public nextId(): number {
     let timestamp = this.timeGen();
 
     if (timestamp < this.lastTimestamp) {
@@ -72,7 +72,7 @@ export class SnowflakeIdGenerator {
       (BigInt(this.workerId) << BigInt(this.workerIdShift)) |
       BigInt(this.sequence);
 
-    return id;
+    return Number(id);
   }
 
   /**

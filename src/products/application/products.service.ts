@@ -39,7 +39,7 @@ export class ProductsService {
     return this.productRepository.findAll();
   }
 
-  async findProductById(id: bigint): Promise<Product> {
+  async findProductById(id: number): Promise<Product> {
     const product = await this.productRepository.findById(id);
 
     if (!product) {
@@ -50,7 +50,7 @@ export class ProductsService {
   }
 
   async updateProduct(
-    id: bigint,
+    id: number,
     updateProductDto: UpdateProductDto,
   ): Promise<Product> {
     const { categoryId } = updateProductDto;
@@ -76,7 +76,7 @@ export class ProductsService {
     return this.productRepository.update(id, product);
   }
 
-  async deleteProduct(id: bigint): Promise<void> {
+  async deleteProduct(id: number): Promise<void> {
     await this.productRepository.delete(id);
   }
 
@@ -92,7 +92,7 @@ export class ProductsService {
     return this.categoryRepository.findAll();
   }
 
-  async findCategoryById(id: bigint): Promise<Category> {
+  async findCategoryById(id: number): Promise<Category> {
     const category = await this.categoryRepository.findById(id);
 
     if (!category) {
@@ -103,7 +103,7 @@ export class ProductsService {
   }
 
   async updateCategory(
-    id: bigint,
+    id: number,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
     const category = await this.findCategoryById(id);
@@ -118,7 +118,7 @@ export class ProductsService {
     return this.categoryRepository.update(id, category);
   }
 
-  async deleteCategory(id: bigint): Promise<void> {
+  async deleteCategory(id: number): Promise<void> {
     await this.categoryRepository.delete(id);
   }
 }

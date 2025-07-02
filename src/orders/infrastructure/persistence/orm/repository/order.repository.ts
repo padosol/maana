@@ -33,7 +33,7 @@ export class OrmOrderRepository implements OrderRepository {
     return orders.map((order) => OrderMapper.toDomain(order));
   }
 
-  async findOne(id: bigint): Promise<Order | null> {
+  async findOne(id: number): Promise<Order | null> {
     const order = await this.prisma.orders.findUnique({
       where: { id },
       include: {
@@ -43,7 +43,7 @@ export class OrmOrderRepository implements OrderRepository {
     return order ? OrderMapper.toDomain(order) : null;
   }
 
-  async update(id: bigint, order: Order): Promise<Order> {
+  async update(id: number, order: Order): Promise<Order> {
     const orderOrm = OrderMapper.toPersistence(order);
     const updatedOrder = await this.prisma.orders.update({
       where: { id },
@@ -60,7 +60,7 @@ export class OrmOrderRepository implements OrderRepository {
     return OrderMapper.toDomain(updatedOrder);
   }
 
-  async remove(id: bigint): Promise<void> {
+  async remove(id: number): Promise<void> {
     await this.prisma.orders.delete({ where: { id } });
   }
 }

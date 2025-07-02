@@ -1,6 +1,6 @@
 export class Users {
   constructor(
-    public readonly id: bigint | null,
+    public readonly id: number | null,
     public readonly email: string,
     public readonly password: string | null,
     public readonly role: string | null,

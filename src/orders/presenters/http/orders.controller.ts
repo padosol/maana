@@ -39,14 +39,14 @@ export class OrdersController {
 
   @Get(':id')
   @ApiOperation({ summary: '주문 상세 조회 API' })
-  findOne(@Param('id') id: bigint) {
+  findOne(@Param('id') id: number) {
     return this.ordersService.findOne(id);
   }
 
   @Put(':id')
   @ApiOperation({ summary: '주문 상태 업데이트 API' })
   updateOrderStatus(
-    @Param('id') id: bigint,
+    @Param('id') id: number,
     @Body() updateOrderStatusDto: UpdateOrderStatusDto,
   ) {
     return this.ordersService.updateOrderStatus(id, updateOrderStatusDto);
@@ -54,7 +54,7 @@ export class OrdersController {
 
   @Delete(':id')
   @ApiOperation({ summary: '주문 삭제 API' })
-  remove(@Param('id') id: bigint) {
+  remove(@Param('id') id: number) {
     return this.ordersService.remove(id);
   }
 }

@@ -65,7 +65,7 @@ export class OrdersService {
     return this.orderRepository.findAll();
   }
 
-  async findOne(id: bigint): Promise<Order> {
+  async findOne(id: number): Promise<Order> {
     const order = await this.orderRepository.findOne(id);
     if (!order) {
       throw new NotFoundException('Order not found');
@@ -74,7 +74,7 @@ export class OrdersService {
   }
 
   async updateOrderStatus(
-    id: bigint,
+    id: number,
     updateOrderStatusDto: UpdateOrderStatusDto,
   ): Promise<Order> {
     const order = await this.findOne(id);
@@ -87,7 +87,7 @@ export class OrdersService {
     return this.orderRepository.update(id, order);
   }
 
-  async remove(id: bigint): Promise<void> {
+  async remove(id: number): Promise<void> {
     this.logger.log(`Removing order with id: ${id}`);
 
     const order = await this.findOne(id);

@@ -1,8 +1,8 @@
 export class Category {
   constructor(
-    public readonly id: bigint | null,
+    public readonly id: number | null,
     public name: string,
     public description: string | null,
-    public parentId: bigint | null,
+    public parentId: number | null,
   ) {}
 }

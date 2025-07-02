@@ -9,7 +9,7 @@ class OrderItemDto {
     description: 'The product ID',
     example: 1,
   })
-  productId: bigint;
+  productId: number;
 
   @IsNotEmpty()
   @IsNumber()
@@ -27,7 +27,7 @@ export class CreateOrderDto {
     description: 'The user ID',
     example: 1,
   })
-  userId: bigint;
+  userId: number;
 
   @IsNotEmpty()
   @IsArray()

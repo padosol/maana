@@ -24,7 +24,7 @@ export class OrmCategoryPersistence implements CategoryRepository {
     return categories.map((category) => CategoryMapper.toDomain(category));
   }
 
-  async findById(id: bigint): Promise<Category | null> {
+  async findById(id: number): Promise<Category | null> {
     const category = await this.prisma.category.findUnique({
       where: { id },
     });
@@ -32,7 +32,7 @@ export class OrmCategoryPersistence implements CategoryRepository {
     return category ? CategoryMapper.toDomain(category) : null;
   }
 
-  async update(id: bigint, category: Category): Promise<Category> {
+  async update(id: number, category: Category): Promise<Category> {
     const categoryData = CategoryMapper.toPersistence(category);
 
     const updatedCategory = await this.prisma.category.update({
@@ -43,7 +43,7 @@ export class OrmCategoryPersistence implements CategoryRepository {
     return CategoryMapper.toDomain(updatedCategory);
   }
 
-  async delete(id: bigint): Promise<void> {
+  async delete(id: number): Promise<void> {
     await this.prisma.category.delete({
       where: { id },
     });

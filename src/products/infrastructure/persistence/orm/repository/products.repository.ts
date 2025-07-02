@@ -16,7 +16,7 @@ export class OrmProductsPersistence implements ProductsRepository {
     return products.map((product) => ProductsMapper.toDomain(product));
   }
 
-  async findById(id: bigint): Promise<Product | null> {
+  async findById(id: number): Promise<Product | null> {
     const product = await this.prisma.products.findUnique({
       where: { id },
       include: { category: true },
@@ -36,7 +36,7 @@ export class OrmProductsPersistence implements ProductsRepository {
     return ProductsMapper.toDomain(createdProduct);
   }
 
-  async update(id: bigint, product: Product): Promise<Product> {
+  async update(id: number, product: Product): Promise<Product> {
     const productData = ProductsMapper.toPersistence(product);
 
     const updatedProduct = await this.prisma.products.update({
@@ -48,7 +48,7 @@ export class OrmProductsPersistence implements ProductsRepository {
     return ProductsMapper.toDomain(updatedProduct);
   }
 
-  async delete(id: bigint): Promise<void> {
+  async delete(id: number): Promise<void> {
     await this.prisma.products.delete({
       where: { id },
     });
