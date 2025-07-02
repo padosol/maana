@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { DynamicModule, Module, Type } from '@nestjs/common';
 import { OrdersModule } from 'src/orders/application/orders.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { ProductsModule } from 'src/products/application/products.module';
@@ -10,4 +10,11 @@ import { PaymentsService } from './payments.service';
   controllers: [PaymentsController],
   providers: [PaymentsService],
 })
-export class PaymentsModule {}
+export class PaymentsModule {
+  static withInfrastructure(infrastructureModuel: Type | DynamicModule) {
+    return {
+      module: PaymentsModule,
+      imports: [infrastructureModuel],
+    };
+  }
+}

@@ -3,5 +3,5 @@ export abstract class PaymentsGateway {
     paymentKey: string,
     orderId: number,
     amount: number,
-  ): Promise<any>;
+  ): Promise<boolean>;
 }

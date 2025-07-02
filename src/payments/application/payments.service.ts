@@ -4,7 +4,6 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { plainToInstance } from 'class-transformer';
 import { OrdersService } from 'src/orders/application/orders.service';
 import { Order } from 'src/orders/domain/order';
 import { OrderStatus } from 'src/orders/domain/value-object/order-status.enum';
@@ -12,7 +11,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ProductsService } from 'src/products/application/products.service';
 import { UpdateProductDto } from 'src/products/presenters/http/dto/update-product.dto';
 import { ConfirmPaymentDto } from '../presenters/http/dto/request/confirm.payment.dto';
-import { TossPaymentResponseDto } from '../type/toss.payment';
 import { PaymentsGateway } from './ports/payments.gateway';
 
 @Injectable()
@@ -52,17 +50,13 @@ export class PaymentsService {
       throw new BadRequestException('Payment confirmation failed');
     }
 
-    const data = plainToInstance(TossPaymentResponseDto, await response.json());
-
-    await this.successPayment(order, data);
+    await this.successPayment(order);
 
     return true;
   }
 
-  async successPayment(order: Order, data: TossPaymentResponseDto) {
+  async successPayment(order: Order) {
     await this.prisma.$transaction(async (tx) => {
-      this.logger.log(`결제 승인 성공: ${JSON.stringify(data)}`);
-
       // 재고 감소
       for (const item of order.orderItems) {
         const product = await this.productsService.findProductById(
