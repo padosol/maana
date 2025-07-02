@@ -34,7 +34,7 @@ export class UsersService {
     return user;
   }
 
-  async findOneById(id: bigint): Promise<Users> {
+  async findOneById(id: number): Promise<Users> {
     const user = await this.usersRepository.findOneById(id);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -43,7 +43,7 @@ export class UsersService {
     return user;
   }
 
-  async update(id: bigint, updateUserDto: UpdateUserDto): Promise<Users> {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<Users> {
     const user = await this.usersRepository.findOneById(id);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -63,7 +63,7 @@ export class UsersService {
     return updatedUser;
   }
 
-  async remove(id: bigint) {
+  async remove(id: number) {
     const user = await this.usersRepository.findOneById(id);
     if (!user) {
       throw new NotFoundException('User not found');

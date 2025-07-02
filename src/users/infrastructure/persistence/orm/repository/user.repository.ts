@@ -34,7 +34,7 @@ export class OrmUsersRepository implements UsersReposiotry {
     return UsersMapper.toDomain(user);
   }
 
-  async findOneById(id: bigint): Promise<Users | null> {
+  async findOneById(id: number): Promise<Users | null> {
     const user = await this.prismaService.users.findUnique({
       where: { id },
     });
@@ -46,7 +46,7 @@ export class OrmUsersRepository implements UsersReposiotry {
     return UsersMapper.toDomain(user);
   }
 
-  async update(id: bigint, user: Users): Promise<Users> {
+  async update(id: number, user: Users): Promise<Users> {
     const updatedUser = await this.prismaService.users.update({
       where: { id },
       data: {
@@ -59,7 +59,7 @@ export class OrmUsersRepository implements UsersReposiotry {
     return UsersMapper.toDomain(updatedUser);
   }
 
-  async remove(id: bigint): Promise<void> {
+  async remove(id: number): Promise<void> {
     await this.prismaService.users.delete({ where: { id } });
   }
 }

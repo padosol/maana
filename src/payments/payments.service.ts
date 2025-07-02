@@ -11,6 +11,7 @@ import { Order } from 'src/orders/domain/order';
 import { OrderStatus } from 'src/orders/domain/value-object/order-status.enum';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ProductsService } from 'src/products/application/products.service';
+import { UpdateProductDto } from 'src/products/presenters/http/dto/update-product.dto';
 import { ConfirmPaymentDto } from './dto/request/confirm.payment.dto';
 import { TossPaymentResponseDto } from './type/toss.payment';
 
@@ -86,35 +87,37 @@ export class PaymentsService {
   }
 
   async successPayment(order: Order, res: Response) {
-    const json: unknown = await res.json();
-    const data: TossPaymentResponseDto = plainToInstance(
-      TossPaymentResponseDto,
-      json,
-    );
-
-    this.logger.log(`결제 승인 성공: ${JSON.stringify(data)}`);
-
-    // 재고 감소
-    for (const item of order.orderItems) {
-      const product = await this.productsService.findProductById(
-        item.productId,
+    await this.prisma.$transaction(async (tx) => {
+      const json: unknown = await res.json();
+      const data: TossPaymentResponseDto = plainToInstance(
+        TossPaymentResponseDto,
+        json,
       );
 
-      if (!product) {
-        throw new NotFoundException('Product not found');
+      this.logger.log(`결제 승인 성공: ${JSON.stringify(data)}`);
+
+      // 재고 감소
+      for (const item of order.orderItems) {
+        const product = await this.productsService.findProductById(
+          item.productId,
+        );
+
+        product.decreaseStock(item.stock);
+        const updateProductDto: UpdateProductDto = {
+          categoryId: product.category.id!,
+          stock: product.stock,
+          price: product.price.toNumber(),
+          description: product.description,
+          name: product.name,
+        };
+        await this.productsService.updateProduct(product.id!, updateProductDto);
       }
 
-      product.decreaseStock(item.stock);
-      await this.prisma.products.update({
-        where: { id: item.productId },
-        data: { stock: product.stock },
+      order.completePayment();
+      await tx.orders.update({
+        where: { id: order.id },
+        data: { status: OrderStatus.COMPLETED.toString() }, // TODO: 추후 수정
       });
-    }
-
-    order.completePayment();
-    await this.prisma.orders.update({
-      where: { id: order.id },
-      data: { status: OrderStatus.COMPLETED.toString() }, // TODO: 추후 수정
     });
   }
 }
