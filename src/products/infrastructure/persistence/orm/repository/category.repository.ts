@@ -9,10 +9,10 @@ export class OrmCategoryPersistence implements CategoryRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(category: Category): Promise<Category> {
-    const categoryData = CategoryMapper.toPersistence(category);
+    const { id, ...rest } = CategoryMapper.toPersistence(category);
 
     const createdCategory = await this.prisma.category.create({
-      data: categoryData,
+      data: rest,
     });
 
     return CategoryMapper.toDomain(createdCategory);

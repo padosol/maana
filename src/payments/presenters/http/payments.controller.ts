@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
+import { PaymentsService } from '../../application/payments.service';
 import { ConfirmPaymentDto } from './dto/request/confirm.payment.dto';
-import { PaymentsService } from './payments.service';
 
 @Controller({
   path: 'payments',
