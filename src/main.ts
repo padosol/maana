@@ -7,7 +7,7 @@ async function bootstrap() {
   const app = await NestFactory.create(
     AppModule.register({
       driver: 'orm',
-      pg: 'toss',
+      pg: 'local',
     }),
   );
 
