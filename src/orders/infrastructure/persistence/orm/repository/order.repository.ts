@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { OrderRepository } from 'src/orders/application/ports/order.repository';
 import { Order } from 'src/orders/domain/order';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -8,13 +9,22 @@ import { OrderMapper } from '../mappers/order.mapper';
 export class OrmOrderRepository implements OrderRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(order: Order): Promise<Order> {
+  async create(
+    order: Order,
+    tx: Prisma.TransactionClient = this.prisma,
+  ): Promise<Order> {
     const orderOrm = OrderMapper.toPersistence(order);
-    const createdOrder = await this.prisma.orders.create({
+    const createdOrder = await tx.orders.create({
       data: {
         ...orderOrm,
         orderItems: {
-          create: orderOrm.orderItems,
+          create: orderOrm.orderItems.map((item) => {
+            const { id, orderId, ...rest } = item;
+
+            return {
+              ...rest,
+            };
+          }),
         },
       },
       include: {
@@ -24,8 +34,8 @@ export class OrmOrderRepository implements OrderRepository {
     return OrderMapper.toDomain(createdOrder);
   }
 
-  async findAll(): Promise<Order[]> {
-    const orders = await this.prisma.orders.findMany({
+  async findAll(tx: Prisma.TransactionClient = this.prisma): Promise<Order[]> {
+    const orders = await tx.orders.findMany({
       include: {
         orderItems: true,
       },
@@ -33,9 +43,12 @@ export class OrmOrderRepository implements OrderRepository {
     return orders.map((order) => OrderMapper.toDomain(order));
   }
 
-  async findOne(id: number): Promise<Order | null> {
-    const order = await this.prisma.orders.findUnique({
-      where: { id },
+  async findOne(
+    id: number,
+    tx: Prisma.TransactionClient = this.prisma,
+  ): Promise<Order | null> {
+    const order = await tx.orders.findUnique({
+      where: { id: Number(id) },
       include: {
         orderItems: true,
       },
@@ -43,14 +56,24 @@ export class OrmOrderRepository implements OrderRepository {
     return order ? OrderMapper.toDomain(order) : null;
   }
 
-  async update(id: number, order: Order): Promise<Order> {
+  async update(
+    id: number,
+    order: Order,
+    tx: Prisma.TransactionClient = this.prisma,
+  ): Promise<Order> {
     const orderOrm = OrderMapper.toPersistence(order);
-    const updatedOrder = await this.prisma.orders.update({
+    const updatedOrder = await tx.orders.update({
       where: { id },
       data: {
         ...orderOrm,
         orderItems: {
-          create: orderOrm.orderItems,
+          create: orderOrm.orderItems.map((item) => {
+            const { id, orderId, ...rest } = item;
+
+            return {
+              ...rest,
+            };
+          }),
         },
       },
       include: {
@@ -60,7 +83,10 @@ export class OrmOrderRepository implements OrderRepository {
     return OrderMapper.toDomain(updatedOrder);
   }
 
-  async remove(id: number): Promise<void> {
-    await this.prisma.orders.delete({ where: { id } });
+  async remove(
+    id: number,
+    tx: Prisma.TransactionClient = this.prisma,
+  ): Promise<void> {
+    await tx.orders.delete({ where: { id } });
   }
 }
