@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
-  output = "../node_modules/.prisma/client"
+  provider = "prisma-client-js"  
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -9,7 +9,7 @@ datasource db {
 }
 
 model Users {
-  id        Int    @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   email     String    @unique
   password  String
   role      String
@@ -19,7 +19,7 @@ model Users {
 }
 
 model Products {
-  id          Int      @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   name        String
   description String
   price       Decimal
@@ -27,12 +27,12 @@ model Products {
   imageUrl    String?
   isActive    Boolean     @default(true)
   categoryId  Int
-  orderItems  OrderItem[]
   category    Category    @relation(fields: [categoryId], references: [id])
+  OrderItem   OrderItem[]
 }
 
 model Category {
-  id          Int     @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   name        String     @unique
   description String?
   parentId    Int?
@@ -40,18 +40,18 @@ model Category {
 }
 
 model Orders {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  status    String
-  total     Decimal
-  createdAt DateTime
-  updatedAt DateTime?
+  id         Int         @id
+  userId     Int
+  status     String
+  total      Decimal
+  createdAt  DateTime
+  updatedAt  DateTime?
   orderItems OrderItem[]
-  user      Users       @relation(fields: [userId], references: [id])
+  user       Users       @relation(fields: [userId], references: [id])
 }
 
 model OrderItem {
-  id         Int   @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   orderId    Int
   productId  Int
   quantity   Int

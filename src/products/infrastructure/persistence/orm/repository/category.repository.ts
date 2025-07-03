@@ -33,11 +33,12 @@ export class OrmCategoryPersistence implements CategoryRepository {
   }
 
   async update(id: number, category: Category): Promise<Category> {
-    const categoryData = CategoryMapper.toPersistence(category);
+    const { name, description, parentId } =
+      CategoryMapper.toPersistence(category);
 
     const updatedCategory = await this.prisma.category.update({
       where: { id },
-      data: categoryData,
+      data: { name, description, parentId },
     });
 
     return CategoryMapper.toDomain(updatedCategory);
